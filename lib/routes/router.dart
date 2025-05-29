@@ -2,9 +2,9 @@ import 'package:brainrot_flutter/services/auth_services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:brainrot_flutter/views/loginView.dart';
-import 'package:brainrot_flutter/views/homeView.dart';
-import 'package:brainrot_flutter/views/settingView.dart';
+import 'package:brainrot_flutter/login/views/loginView.dart';
+import 'package:brainrot_flutter/login/views/homeView.dart';
+import 'package:brainrot_flutter/login/views/settingView.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(

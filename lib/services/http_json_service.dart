@@ -50,6 +50,44 @@ class HttpJsonService {
     );
   }
 
+  Future<void> sendRequest({
+    required HttpMethod method,
+    required String url,
+    Map<String, dynamic>? parameters,
+    dynamic data,
+    required Function(String, dynamic, String, BuildContext?) callback,
+    required String requestId,
+  }) async {
+    if (url.isEmpty) {
+      print('Error: Empty URL for requestId: $requestId');
+      callback('ERROR', {'message': 'Empty URL'}, requestId, null);
+      return;
+    }
+
+    try {
+      print('Sending to: ${Api.baseUrl}$url, Data: $data'); // 요청 로그
+      if (method == HttpMethod.POST) {
+        final response = await _dio.post(
+          url,
+          data: data,
+          queryParameters: parameters,
+          options: Options(
+            extra: {
+              'callback': callback,
+              'requestId': requestId,
+            },
+          ),
+        );
+        print('Response for requestId $requestId: ${response.data}'); // 응답 로그
+        callback('COMPLETED', response.data, requestId, null);
+      }
+    } on DioException catch (e) {
+      print(
+          'Dio Error: ${e.type}, Message: ${e.message}, Request: ${e.requestOptions.data}'); // 에러 로그
+      await _errorHandler(e);
+    }
+  }
+
   Future<void> _errorHandler(DioException e) async {
     String errorMessage = '알 수 없는 오류가 발생했습니다.';
     bool clearToken = false;
@@ -62,7 +100,7 @@ class HttpJsonService {
         break;
       case DioExceptionType.badResponse:
         errorMessage = e.response?.statusCode == 500
-            ? '서버 내부 오류가 발생했습니다.'
+            ? e.response?.data['resultMessage'] ?? '서버 내부 오류가 발생했습니다.'
             : 'HTTP 오류: ${e.response?.statusCode}';
         break;
       case DioExceptionType.connectionError:
@@ -83,51 +121,16 @@ class HttpJsonService {
     final callback = e.requestOptions.extra['callback'] as Function(
         String, dynamic, String, BuildContext?)?;
     if (callback != null) {
-      callback('ERROR', {'message': errorMessage},
-          e.requestOptions.extra['requestId'], null);
-    }
-  }
-
-  Future<void> sendRequest({
-    required HttpMethod method,
-    required String url,
-    Map<String, dynamic>? parameters,
-    dynamic data,
-    required Function(String, dynamic, String, BuildContext?) callback,
-    required String requestId,
-  }) async {
-    if (url.isEmpty) {
-      callback('ERROR', {'message': 'Empty URL'}, requestId, null);
-      return;
-    }
-
-    try {
-      if (method == HttpMethod.GET) {
-        await _dio.get(
-          url,
-          queryParameters: parameters,
-          options: Options(
-            extra: {
-              'callback': callback,
-              'requestId': requestId,
-            },
-          ),
-        );
-      } else if (method == HttpMethod.POST) {
-        await _dio.post(
-          url,
-          data: data,
-          queryParameters: parameters,
-          options: Options(
-            extra: {
-              'callback': callback,
-              'requestId': requestId,
-            },
-          ),
-        );
-      }
-    } on DioException catch (e) {
-      await _errorHandler(e);
+      print(
+          'Calling callback with error: $errorMessage, requestId: ${e.requestOptions.extra['requestId']}');
+      callback(
+          'ERROR',
+          {
+            'resultCode': '500',
+            'resultMessage': errorMessage,
+          },
+          e.requestOptions.extra['requestId'],
+          null);
     }
   }
 }

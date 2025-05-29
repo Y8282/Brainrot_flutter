@@ -3,7 +3,6 @@ import 'package:brainrot_flutter/services/http_json_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-
 final authServiceProvider = Provider<AuthService>((ref) {
   return AuthService(ref);
 });
@@ -18,21 +17,22 @@ class AuthService {
     required String requestId,
     required Function(String, dynamic, String, BuildContext?) callback,
   }) async {
+    final username = parameters['username']?.toString();
+    final password = parameters['password']?.toString();
+
+    final data = {
+      'username': username,
+      'password': password,
+      'requestId': requestId,
+    };
+    // print('Login request data: $data'); // 요청 본문 로그
     await _ref.read(httpJsonServiceProvider).sendRequest(
-      method: HttpMethod.POST,
-      url: '/auth/login',
-      data: {'parameters': parameters},
-      requestId: requestId,
-      callback: (status, data, reqId, context) async {
-        if (status == 'COMPLETED' && data['resultCode'] == '000') {
-          final token = data['token'];
-          await _ref.read(authTokenProvider.notifier).saveToken(token);
-          callback(status, data, reqId, context);
-        } else {
-          callback('ERROR', {'message': data['resultMessage'] ?? 'Login failed'}, reqId, context);
-        }
-      },
-    );
+          method: HttpMethod.POST,
+          url: '/api/auth/login',
+          data: data,
+          requestId: requestId,
+          callback: callback,
+        );
   }
 
   Future<void> logout() async {

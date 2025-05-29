@@ -1,4 +1,4 @@
-import 'package:brainrot_flutter/model/home_view_model.dart';
+import 'package:brainrot_flutter/login/model/home_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
