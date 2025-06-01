@@ -35,12 +35,43 @@ class AuthService {
         );
   }
 
+  Future<void> signup({
+    required Map<String, dynamic> parameters,
+    required String requestId,
+    required Function(String, dynamic, String, BuildContext?) callback,
+  }) async {
+    final data = {
+      'username': parameters['username'],
+      'email': parameters['email'],
+      'password': parameters['password'],
+      'requestId': requestId
+    };
+    try {
+      final response = await _ref.read(httpJsonServiceProvider).sendRequest(
+          method: HttpMethod.POST,
+          url: '/api/auth/signup',
+          data: data,
+          callback: callback,
+          requestId: requestId);
+    } catch (e) {
+      callback(
+          'ERROR',
+          {
+            'resultCode': 500,
+            'resultMessage': '네트워크 오류: $e',
+          },
+          requestId,
+          null);
+    }
+  }
+
   Future<void> logout() async {
     await _ref.read(authTokenProvider.notifier).clearToken();
   }
 
   Future<bool> isAuthenticated() async {
     final token = _ref.read(authTokenProvider);
+    print('Checking isAuthenticated, token: $token');
     return token != null;
   }
 }

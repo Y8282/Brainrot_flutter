@@ -5,6 +5,10 @@ class Settingview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Scaffold(
+      body: Container(
+        child: Text("hi"),
+      ),
+    );
   }
 }

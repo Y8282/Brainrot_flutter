@@ -1,6 +1,7 @@
 import 'package:brainrot_flutter/login/model/login_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class Loginview extends ConsumerWidget {
   Loginview({super.key});
@@ -20,7 +21,7 @@ class Loginview extends ConsumerWidget {
             child: Column(
               children: [
                 TextField(
-                  controller: vm.username,
+                  controller: vm.loginUsername,
                   decoration: const InputDecoration(
                       border: OutlineInputBorder(), labelText: 'Username'),
                 ),
@@ -28,7 +29,7 @@ class Loginview extends ConsumerWidget {
                   height: 20,
                 ),
                 TextField(
-                  controller: vm.password,
+                  controller: vm.loginPassword,
                   decoration: const InputDecoration(
                       border: OutlineInputBorder(), labelText: 'Password'),
                   obscureText: true,
@@ -41,8 +42,8 @@ class Loginview extends ConsumerWidget {
                       ? null
                       : () {
                           ref.read(loginViewModelProvider.notifier).login(
-                                vm.username.text,
-                                vm.password.text,
+                                vm.loginUsername.text,
+                                vm.loginPassword.text,
                                 context,
                               );
                         },
@@ -54,12 +55,14 @@ class Loginview extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     GestureDetector(
+                      onTap: () => context.go('/signup'),
                       child: Text("회원가입"),
                     ),
                     SizedBox(
                       width: 10,
                     ),
                     GestureDetector(
+                      onTap: () => print("hi"),
                       child: Text("비밀번호 / 아이디 찾기"),
                     )
                   ],
