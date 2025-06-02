@@ -33,15 +33,15 @@ class LoginViewModel extends StateNotifier<LoginViewState> {
   final Ref _ref;
 
   // Editing
-  final TextEditingController loginUsername = TextEditingController();
-  final TextEditingController loginPassword = TextEditingController();
+  final TextEditingController loginUsername = TextEditingController();        // 로그인 이름 -> 나중에 이메일로 변경
+  final TextEditingController loginPassword = TextEditingController();        // 로그인 패스워드
 
   // Signup Editing
   // Editing
-  final TextEditingController SignupName = TextEditingController();
-  final TextEditingController SignupEmail = TextEditingController();
-  final TextEditingController SignupPassword = TextEditingController();
-  final TextEditingController SignupCheckpassword = TextEditingController();
+  final TextEditingController SignupName = TextEditingController();           // 회원가입 이름
+  final TextEditingController SignupEmail = TextEditingController();          // 회원가입 이메일
+  final TextEditingController SignupPassword = TextEditingController();       // 회원가입 패스워드
+  final TextEditingController SignupCheckpassword = TextEditingController();  // 회원가입 패스워드 확인
 
   LoginViewModel(this._ref) : super(const LoginViewState()) {
     initialize();
@@ -76,6 +76,7 @@ class LoginViewModel extends StateNotifier<LoginViewState> {
         );
   }
 
+  // 회원가입 요청
   Future<void> signup(BuildContext context) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     final requestId = 'signup';

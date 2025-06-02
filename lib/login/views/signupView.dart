@@ -1,4 +1,4 @@
-import 'package:brainrot_flutter/common/message.dart';
+import 'package:brainrot_flutter/common/CommonDialog.dart';
 import 'package:brainrot_flutter/login/model/login_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
