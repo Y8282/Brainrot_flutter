@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+//보완 필요 기기별로 반응형으로 만들어야함
 void main() async {
   await dotenv.load(fileName: ".env");
   runApp(const ProviderScope(child: MyApp()));

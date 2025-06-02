@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:brainrot_flutter/login/views/loginView.dart';
 import 'package:brainrot_flutter/login/views/homeView.dart';
 
+// 라우팅 설정
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/home',

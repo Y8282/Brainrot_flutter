@@ -1,0 +1,2 @@
+D:/project/workspace/solo/flutter/brainrot_flutter/android/app/.cxx/Debug/2h4z4p73/arm64-v8a/CMakeFiles/edit_cache.dir
+D:/project/workspace/solo/flutter/brainrot_flutter/android/app/.cxx/Debug/2h4z4p73/arm64-v8a/CMakeFiles/rebuild_cache.dir
