@@ -2,12 +2,13 @@ import 'package:brainrot_flutter/providers/auth_provider.dart';
 import 'package:brainrot_flutter/services/http_json_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 final authServiceProvider = Provider<AuthService>((ref) {
   return AuthService(ref);
 });
 
-class AuthService {
+class AuthService extends ChangeNotifier {
   final Ref _ref;
 
   AuthService(this._ref);
@@ -65,8 +66,9 @@ class AuthService {
     }
   }
 
-  Future<void> logout() async {
+  Future<void> logout(BuildContext context) async {
     await _ref.read(authTokenProvider.notifier).clearToken();
+    context.go('/login');
   }
 
   Future<bool> isAuthenticated() async {

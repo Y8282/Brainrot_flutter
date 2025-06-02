@@ -1,16 +1,20 @@
 import 'package:brainrot_flutter/login/model/home_view_model.dart';
+import 'package:brainrot_flutter/login/model/login_view_model.dart';
+import 'package:brainrot_flutter/services/auth_services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class Homeview extends ConsumerWidget {
   final TextEditingController _controller = TextEditingController();
-  
-   Homeview({super.key});
+
+  Homeview({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    
     final homeState = ref.watch(homeViewModelProvider);
-
+    final vm = ref.watch(authServiceProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Image Generator')),
       body: Padding(
@@ -25,11 +29,19 @@ class Homeview extends ConsumerWidget {
               onPressed: homeState.isLoading
                   ? null
                   : () {
-                      ref.read(homeViewModelProvider.notifier).generateImage(_controller.text, context);
+                      ref
+                          .read(homeViewModelProvider.notifier)
+                          .generateImage(_controller.text, context);
                     },
               child: homeState.isLoading
                   ? const CircularProgressIndicator()
                   : const Text('Generate Image'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                vm.logout(context);
+              },
+              child: Text("logout"),
             ),
             if (homeState.imageUrl != null)
               Image.network(
@@ -38,7 +50,8 @@ class Homeview extends ConsumerWidget {
                   if (loadingProgress == null) return child;
                   return const CircularProgressIndicator();
                 },
-                errorBuilder: (context, error, stackTrace) => const Text('Failed to load image'),
+                errorBuilder: (context, error, stackTrace) =>
+                    const Text('Failed to load image'),
               )
             else
               const Text('No image generated yet'),

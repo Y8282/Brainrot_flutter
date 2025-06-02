@@ -8,6 +8,10 @@ class Loginview extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final viewModel = ref.watch(loginViewModelProvider.notifier);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      viewModel.initialize();
+    });
     final loginState = ref.watch(loginViewModelProvider);
     final vm = ref.watch(loginViewModelProvider.notifier);
     return Scaffold(
@@ -62,8 +66,12 @@ class Loginview extends ConsumerWidget {
                       width: 10,
                     ),
                     GestureDetector(
-                      onTap: () => print("hi"),
-                      child: Text("비밀번호 / 아이디 찾기"),
+                      onTap: () => context.go('/findId'),
+                      child: Text("아이디 찾기"),
+                    ),
+                    GestureDetector(
+                      onTap: () => context.go('/findPassword'),
+                      child: Text("비밀번호 찾기"),
                     )
                   ],
                 ),

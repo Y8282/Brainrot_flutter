@@ -1,10 +1,8 @@
 import 'package:brainrot_flutter/providers/auth_provider.dart';
 import 'package:brainrot_flutter/services/auth_services.dart';
-import 'package:brainrot_flutter/widget/navistate.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:uuid/uuid.dart';
 
 class LoginViewState {
   final bool isLoading;
@@ -27,7 +25,7 @@ class LoginViewState {
 }
 
 final loginViewModelProvider =
-    StateNotifierProvider<LoginViewModel, LoginViewState>((ref) {
+    StateNotifierProvider.autoDispose<LoginViewModel, LoginViewState>((ref) {
   return LoginViewModel(ref);
 });
 
@@ -51,6 +49,12 @@ class LoginViewModel extends StateNotifier<LoginViewState> {
 
   void initialize() {
     state = const LoginViewState(isLoading: false, errorMessage: null);
+    loginUsername.text = '';
+    loginPassword.text = '';
+    SignupName.text = '';
+    SignupEmail.text = '';
+    SignupPassword.text = '';
+    SignupCheckpassword.text = '';
   }
 
   // 로그인 요청
@@ -204,5 +208,17 @@ class LoginViewModel extends StateNotifier<LoginViewState> {
           SnackBar(content: Text('잘못된 요청'), duration: Duration(seconds: 3)),
         );
     }
+  }
+
+  // Dispose
+  @override
+  void dispose() {
+    super.dispose();
+    loginUsername.dispose();
+    loginPassword.dispose();
+    SignupName.dispose();
+    SignupEmail.dispose();
+    SignupPassword.dispose();
+    SignupCheckpassword.dispose();
   }
 }

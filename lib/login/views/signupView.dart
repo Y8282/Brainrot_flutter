@@ -1,13 +1,18 @@
+import 'package:brainrot_flutter/common/message.dart';
 import 'package:brainrot_flutter/login/model/login_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class Signupview extends ConsumerWidget {
   const Signupview({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final viewModel = ref.watch(loginViewModelProvider.notifier);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      viewModel.initialize();
+    });
     final vm = ref.watch(loginViewModelProvider.notifier);
     return Scaffold(
       body: Center(
@@ -55,7 +60,23 @@ class Signupview extends ConsumerWidget {
                   onPressed: () {
                     vm.signup(context);
                   },
-                  child: Text("회원가입"))
+                  child: Text("회원가입")),
+              SizedBox(
+                height: 20,
+              ),
+              ElevatedButton(
+                  onPressed: () {
+                    openDialog(
+                      context,
+                      message: "삭제하나요?",
+                      buttonType: MessageBottomButtonType.yesno,
+                      type: MessagePopupType.warning,
+                      onConfirmed: () {
+                        context.go('/login');
+                      },
+                    );
+                  },
+                  child: Text("홈으로")),
             ],
           ),
         ),

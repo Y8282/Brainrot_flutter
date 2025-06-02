@@ -28,10 +28,8 @@ class AuthProvider extends StateNotifier<String?> {
 
   Future<void> saveToken(String token) async {
     try {
-      print('Saving token: $token');
       await _storage.write(key: _key, value: token);
       state = token;
-      print('Token saved, state updated: $state');
     } catch (e) {
       print('Error saving token: $e');
     }

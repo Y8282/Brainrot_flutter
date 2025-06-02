@@ -1,11 +1,11 @@
 import 'package:brainrot_flutter/login/views/signupView.dart';
+import 'package:brainrot_flutter/providers/auth_provider.dart';
 import 'package:brainrot_flutter/services/auth_services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:brainrot_flutter/login/views/loginView.dart';
 import 'package:brainrot_flutter/login/views/homeView.dart';
-import 'package:brainrot_flutter/login/views/settingView.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -13,10 +13,11 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (BuildContext context, GoRouterState state) async {
       final isAuthenticated =
           await ref.read(authServiceProvider).isAuthenticated();
-      final loggingIn = state.uri.toString() == '/login';
-
-      if (!isAuthenticated && !loggingIn) return '/login';
-      if (isAuthenticated && loggingIn) return '/home';
+      final loggingIn = state.uri.toString();
+      final publicRoutes = ['/login', '/signup', '/findPassword', '/findId'];
+      if (!isAuthenticated && !publicRoutes.contains(loggingIn))
+        return '/login';
+      if (isAuthenticated && publicRoutes.contains(loggingIn)) return '/home';
       return null;
     },
     routes: [
@@ -33,8 +34,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => Homeview(),
       ),
       GoRoute(
-        path: '/settings',
-        builder: (context, state) => Settingview(),
+        path: '/findPassword',
+        builder: (context, state) => Homeview(),
+      ),
+      GoRoute(
+        path: '/findId',
+        builder: (context, state) => Homeview(),
       ),
     ],
   );
