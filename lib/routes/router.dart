@@ -1,3 +1,5 @@
+import 'package:brainrot_flutter/home/homeView.dart';
+import 'package:brainrot_flutter/home/views/makeImageView.dart';
 import 'package:brainrot_flutter/login/views/signupView.dart';
 import 'package:brainrot_flutter/providers/auth_provider.dart';
 import 'package:brainrot_flutter/services/auth_services.dart';
@@ -5,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:brainrot_flutter/login/views/loginView.dart';
-import 'package:brainrot_flutter/login/views/homeView.dart';
+import 'package:brainrot_flutter/home/imageView.dart';
 
 // 라우팅 설정
 final routerProvider = Provider<GoRouter>((ref) {
@@ -31,10 +33,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => Signupview(),
       ),
       GoRoute(
-        path: '/home',
-        builder: (context, state) => Homeview(),
-      ),
-      GoRoute(
         path: '/findPassword',
         builder: (context, state) => Homeview(),
       ),
@@ -42,6 +40,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/findId',
         builder: (context, state) => Homeview(),
       ),
+      GoRoute(
+        path: '/home',
+        builder: (context, state) => Homeview(),
+      ),
+      GoRoute(
+        path: '/',
+        builder: (context, state) => Homeview(),
+      ),
+      GoRoute(
+        path: '/makeImage',
+        builder: (context, state) => Makeimageview(),
+      )
     ],
   );
 });

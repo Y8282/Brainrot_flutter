@@ -1,4 +1,5 @@
 import 'package:brainrot_flutter/login/model/login_view_model.dart';
+import 'package:brainrot_flutter/services/auth_services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +10,7 @@ class Loginview extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final viewModel = ref.watch(loginViewModelProvider.notifier);
+    final authvm = ref.read(authServiceProvider);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       viewModel.initialize();
     });
@@ -72,13 +74,18 @@ class Loginview extends ConsumerWidget {
                     GestureDetector(
                       onTap: () => context.go('/findPassword'),
                       child: Text("비밀번호 찾기"),
-                    )
+                    ),
+                    ElevatedButton(
+                        onPressed: () {
+                          authvm.logout(context);
+                        },
+                        child: Text("로그아웃"))
                   ],
                 ),
                 if (loginState.errorMessage != null)
                   Text(
                     loginState.errorMessage!,
-                    style: const TextStyle(color: Colors.red),
+                    style: TextStyle(color: Colors.red),
                   ),
               ],
             ),
