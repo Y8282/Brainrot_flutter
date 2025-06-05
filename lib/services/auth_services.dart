@@ -52,7 +52,7 @@ class AuthService extends ChangeNotifier {
           method: HttpMethod.POST,
           url: '/api/auth/signup',
           data: data,
-          requestId: requestId
+          requestId: requestId,
           callback: callback
       );
   }
