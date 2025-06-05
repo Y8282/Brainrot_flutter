@@ -47,23 +47,14 @@ class AuthService extends ChangeNotifier {
       'password': parameters['password'],
       'requestId': requestId
     };
-    try {
+    
       final response = await _ref.read(httpJsonServiceProvider).sendRequest(
           method: HttpMethod.POST,
           url: '/api/auth/signup',
           data: data,
-          callback: callback,
-          requestId: requestId);
-    } catch (e) {
-      callback(
-          'ERROR',
-          {
-            'resultCode': 500,
-            'resultMessage': '네트워크 오류: $e',
-          },
-          requestId,
-          null);
-    }
+          requestId: requestId
+          callback: callback
+      );
   }
 
   Future<void> logout(BuildContext context) async {
