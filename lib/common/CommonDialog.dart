@@ -67,11 +67,24 @@ class CommonDialog extends StatelessWidget {
     }
   }
 
+  Color get TextColor {
+    switch (messagePopupType) {
+      case MessagePopupType.information:
+        return ColorStyles.darkgray;
+      case MessagePopupType.warning:
+        return ColorStyles.darkgray;
+      case MessagePopupType.error:
+        return ColorStyles.red;
+      case MessagePopupType.question:
+        return ColorStyles.darkgray;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Center(
       child: SizedBox(
-        width: 200,
+        width: double.infinity,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -83,8 +96,10 @@ class CommonDialog extends StatelessWidget {
                 constraints: BoxConstraints(maxHeight: 150),
                 child: Text(
                   message,
-                  style:
-                      TextStyle(fontSize: 20, decoration: TextDecoration.none),
+                  style: TextStyle(
+                      fontSize: 20,
+                      decoration: TextDecoration.none,
+                      color: TextColor),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -135,7 +150,7 @@ class CommonDialog extends StatelessWidget {
       onPressed: () => Navigator.of(context).pop(result),
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
-        foregroundColor: Colors.white,
+        foregroundColor: ColorStyles.white,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),

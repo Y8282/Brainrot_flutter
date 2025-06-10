@@ -1,3 +1,4 @@
+import 'package:brainrot_flutter/common/CommonDialog.dart';
 import 'package:brainrot_flutter/providers/auth_provider.dart';
 import 'package:brainrot_flutter/services/auth_services.dart';
 import 'package:flutter/material.dart';
@@ -33,15 +34,27 @@ class LoginViewModel extends StateNotifier<LoginViewState> {
   final Ref _ref;
 
   // Editing
-  final TextEditingController loginUsername = TextEditingController();        // 로그인 이름 -> 나중에 이메일로 변경
-  final TextEditingController loginPassword = TextEditingController();        // 로그인 패스워드
+  final TextEditingController loginUsername =
+      TextEditingController(); // 로그인 이름 -> 나중에 이메일로 변경
+  final TextEditingController loginPassword =
+      TextEditingController(); // 로그인 패스워드
 
   // Signup Editing
   // Editing
-  final TextEditingController SignupName = TextEditingController();           // 회원가입 이름
-  final TextEditingController SignupEmail = TextEditingController();          // 회원가입 이메일
-  final TextEditingController SignupPassword = TextEditingController();       // 회원가입 패스워드
-  final TextEditingController SignupCheckpassword = TextEditingController();  // 회원가입 패스워드 확인
+  final TextEditingController signupName = TextEditingController(); // 회원가입 이름
+  final TextEditingController signupEmail = TextEditingController(); // 회원가입 이메일
+  final TextEditingController signupPassword =
+      TextEditingController(); // 회원가입 패스워드
+  final TextEditingController signupCheckpassword =
+      TextEditingController(); // 회원가입 패스워드 확인
+
+  late Map<String, TextEditingController> fields;
+  late Map<String, FocusNode> focusNodes;
+  // 포커스 노드
+  final FocusNode signupNameFocus = FocusNode();
+  final FocusNode signupEmailFocus = FocusNode();
+  final FocusNode signupPasswordFocus = FocusNode();
+  final FocusNode signupCheckPasswordFocus = FocusNode();
 
   LoginViewModel(this._ref) : super(const LoginViewState()) {
     initialize();
@@ -51,10 +64,23 @@ class LoginViewModel extends StateNotifier<LoginViewState> {
     state = const LoginViewState(isLoading: false, errorMessage: null);
     loginUsername.text = '';
     loginPassword.text = '';
-    SignupName.text = '';
-    SignupEmail.text = '';
-    SignupPassword.text = '';
-    SignupCheckpassword.text = '';
+    signupName.text = '';
+    signupEmail.text = '';
+    signupPassword.text = '';
+    signupCheckpassword.text = '';
+
+    fields = {
+      '이름': signupName,
+      '이메일': signupEmail,
+      '비밀번호': signupPassword,
+      '비밀번호 확인': signupCheckpassword
+    };
+    focusNodes = {
+      '이름': signupNameFocus,
+      '이메일': signupEmailFocus,
+      '비밀번호': signupPasswordFocus,
+      '비밀번호 확인': signupCheckPasswordFocus,
+    };
   }
 
   // 로그인 요청
@@ -80,43 +106,50 @@ class LoginViewModel extends StateNotifier<LoginViewState> {
   Future<void> signup(BuildContext context) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     final requestId = 'signup';
-    if (SignupPassword.text != SignupCheckpassword.text) {
-      state =
-          state.copyWith(isLoading: false, errorMessage: "비밀번호가 일치하지 않습니다.");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("비밀번호가 일치하지 않습니다.")),
-      );
-      return;
+
+    for (var entry in fields.entries) {
+      if (entry.value.text.trim().isEmpty) {
+        state = state.copyWith(isLoading: false, errorMessage: "모든 칸을 입력해주세요.");
+        openDialog(context, message: '${entry.key}을 입력해주세요.', onConfirmed: () {
+          focusNodes[entry.key]!.requestFocus();
+        });
+        return;
+      }
     }
 
-    if (SignupName.text.isEmpty ||
-        SignupEmail.text.isEmpty ||
-        SignupPassword.text.isEmpty ||
-        SignupCheckpassword.text.isEmpty) {
-      state = state.copyWith(isLoading: false, errorMessage: "모든 칸을 입력해주세요.");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("모든 칸을 입력해주세요.")),
-      );
+    if (signupPassword.text != signupCheckpassword.text) {
+      state =
+          state.copyWith(isLoading: false, errorMessage: "비밀번호가 일치하지 않습니다.");
+      openDialog(context, message: '비밀번호가 일치하지 않습니다.', onConfirmed: () {
+        signupCheckPasswordFocus.requestFocus();
+      });
       return;
     }
 
     // 이메일 형식 검증
     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-        .hasMatch(SignupEmail.text.trim())) {
+        .hasMatch(signupEmail.text.trim())) {
       state = state.copyWith(
         isLoading: false,
         errorMessage: '유효한 이메일 형식을 입력해주세요.',
       );
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('유효한 이메일 형식을 입력해주세요.')),
+      openDialog(
+        context,
+        message: "유효한 이메일 형식을 입력해주세요.",
+        buttonType: MessageBottomButtonType.yes,
+        type: MessagePopupType.information,
+        onConfirmed: () {
+          signupEmail.clear();
+          signupEmailFocus.requestFocus();
+        },
       );
       return;
     }
 
     final data = {
-      'username': SignupName.text.trim(),
-      'email': SignupEmail.text.trim(),
-      'password': SignupPassword.text,
+      'username': signupName.text.trim(),
+      'email': signupEmail.text.trim(),
+      'password': signupPassword.text,
       'requestId': requestId
     };
     print('회원가입 : ${data}');
@@ -160,54 +193,57 @@ class LoginViewModel extends StateNotifier<LoginViewState> {
               } else {
                 state = state.copyWith(
                     isLoading: false, errorMessage: '인증상태 확인 실패');
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text('인증 상태 확인 실패'),
-                  duration: Duration(seconds: 3),
-                ));
+                openDialog(context, message: "인증 상태 확인 실패", onConfirmed: () {
+                  return;
+                });
               }
             } catch (e) {
               print('토큰 에러 : $e');
               state = state.copyWith(
                   isLoading: false, errorMessage: '토큰 저장 실패: $e');
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text('토큰 저장 실패'), duration: Duration(seconds: 3)));
+              openDialog(context, message: '토큰 저장 실패', onConfirmed: () {
+                return;
+              }, type: MessagePopupType.warning);
             }
+          } else {
+            final message = data['resultCode'] == '500'
+                ? data['resultMessage'] ?? '로그인 실패'
+                : '시스템 에러입니다.\n관리자에게 문의 바랍니다.';
+            state = state.copyWith(isLoading: false, errorMessage: message);
+            print('Showing SnackBar: $message');
+            openDialog(context, message: '로그인 실패', onConfirmed: () {
+              return;
+            }, type: MessagePopupType.warning);
           }
         } else {
-          final message = data['resultCode'] == '500'
-              ? data['resultMessage'] ?? '로그인 실패'
-              : '시스템 에러입니다.\n관리자에게 문의 바랍니다.';
-          state = state.copyWith(isLoading: false, errorMessage: message);
-          print('Showing SnackBar: $message');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(message), duration: Duration(seconds: 3)),
-          );
+          openDialog(context, message: '아이디 혹은 비밀번호가 일치하지 않습니다.',
+              onConfirmed: () {
+            loginPassword.clear();
+          }, type: MessagePopupType.information);
         }
         break;
       case 'signup':
         if (status == 'COMPLETED' && data['resultCode'] == '000') {
           state = state.copyWith(isLoading: false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("회원가입 성공!")),
-          );
-          if (context.mounted) {
+          openDialog(context, message: "회원가입 성공", onConfirmed: () {
             context.go('/login');
-          }
+          });
         } else {
           final message = data['resultCode'] == '500'
               ? data['resultCode'] ?? '회원가입 실패'
               : '시스템 에러입니다 \n 관리자에게 문의바랍니다.';
           state = state.copyWith(isLoading: false, errorMessage: message);
-          print("로그인 에러 $message");
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text(message)));
+          print("회원가입 실패 $message");
+          openDialog(context, message: '회원가입 실패', onConfirmed: () {
+            return;
+          }, type: MessagePopupType.error);
         }
       default:
         print('Unknown requestId: $requestId');
         state = state.copyWith(isLoading: false, errorMessage: '잘못된 요청');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('잘못된 요청'), duration: Duration(seconds: 3)),
-        );
+        openDialog(context, message: "잘못된 요청 입니다", onConfirmed: () {
+          return;
+        }, type: MessagePopupType.warning);
     }
   }
 
@@ -217,9 +253,14 @@ class LoginViewModel extends StateNotifier<LoginViewState> {
     super.dispose();
     loginUsername.dispose();
     loginPassword.dispose();
-    SignupName.dispose();
-    SignupEmail.dispose();
-    SignupPassword.dispose();
-    SignupCheckpassword.dispose();
+    signupName.dispose();
+    signupEmail.dispose();
+    signupPassword.dispose();
+    signupCheckpassword.dispose();
+    signupNameFocus.dispose();
+    signupEmailFocus.dispose();
+    signupPasswordFocus.dispose();
+    signupCheckPasswordFocus.dispose();
+
   }
 }

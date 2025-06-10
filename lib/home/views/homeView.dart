@@ -1,9 +1,10 @@
 import 'dart:math';
 
 import 'package:brainrot_flutter/home/views/mainView.dart';
-import 'package:brainrot_flutter/home/views/makeImageView.dart';
+import 'package:brainrot_flutter/home/model/makeImageView.dart';
+import 'package:brainrot_flutter/home/views/profileView.dart';
 import 'package:brainrot_flutter/login/views/loginView.dart';
-import 'package:brainrot_flutter/home/searchView.dart';
+import 'package:brainrot_flutter/home/views/searchView.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -24,7 +25,7 @@ class HomeViewState extends ConsumerState<Homeview> {
     Searchview(),
     Makeimageview(),
     Loginview(),
-    Loginview(),
+    Profileview(),
   ];
 
   void _onItemTapped(int index) {
@@ -64,6 +65,7 @@ class HomeViewState extends ConsumerState<Homeview> {
       body: PageView(
         controller: _pageController,
         children: _pages,
+        physics: const NeverScrollableScrollPhysics(),
         onPageChanged: (value) {
           setState(() {
             _currentIndex = value;
@@ -101,7 +103,7 @@ class _CustomBottomNavigator extends State<CustomBottomNavigator> {
             selectedIcon: Icon(Icons.home),
             icon: Icon(Icons.home_outlined),
             label: "Home"),
-        NavigationDestination(
+        const NavigationDestination(
           selectedIcon: Icon(Icons.search),
           icon: Icon(Icons.search_outlined),
           label: "Search",
@@ -116,12 +118,12 @@ class _CustomBottomNavigator extends State<CustomBottomNavigator> {
             ),
             label: ''),
         const NavigationDestination(
-            selectedIcon: Icon(Icons.messenger),
+            selectedIcon: Icon(Icons.settings),
             icon: Badge(
-              child: Icon(Icons.messenger_sharp),
+              child: Icon(Icons.settings_outlined),
               label: Text("2"),
             ),
-            label: "Messages"),
+            label: "Setting"),
         const NavigationDestination(
             selectedIcon: Icon(Icons.person_outline),
             icon: Icon(Icons.person),

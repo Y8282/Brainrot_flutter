@@ -1,23 +1,23 @@
-class HomeViewState {
+class MakeimageViewState {
   final bool isLoading;
   final String? imageUrl;
   final String? errorMessage;
 
-  const HomeViewState({
+  const MakeimageViewState({
     this.isLoading = false,
     this.imageUrl,
-    this.errorMessage
+    this.errorMessage,
   });
 
-  HomeViewState copyWith({
+  MakeimageViewState copyWith({
     bool? isLoading,
     String? imageUrl,
     String? errorMessage,
   }) {
-    return HomeViewState(
+    return MakeimageViewState(
       isLoading: isLoading ?? this.isLoading,
       imageUrl: imageUrl ?? this.imageUrl,
-      errorMessage: errorMessage ?? this.errorMessage
+      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 }

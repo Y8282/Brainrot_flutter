@@ -23,7 +23,8 @@ class Signupview extends ConsumerWidget {
           child: Column(
             children: [
               TextField(
-                controller: vm.SignupName,
+                controller: vm.signupName,
+                focusNode: vm.signupNameFocus,
                 decoration: const InputDecoration(
                     border: OutlineInputBorder(), labelText: '이름'),
               ),
@@ -31,7 +32,8 @@ class Signupview extends ConsumerWidget {
                 height: 20,
               ),
               TextField(
-                controller: vm.SignupEmail,
+                controller: vm.signupEmail,
+                focusNode: vm.signupEmailFocus,
                 decoration: const InputDecoration(
                     border: OutlineInputBorder(), labelText: '이메일'),
               ),
@@ -39,7 +41,8 @@ class Signupview extends ConsumerWidget {
                 height: 20,
               ),
               TextField(
-                controller: vm.SignupPassword,
+                controller: vm.signupPassword,
+                focusNode: vm.signupPasswordFocus,
                 decoration: const InputDecoration(
                     border: OutlineInputBorder(), labelText: '패스워드'),
                 obscureText: true,
@@ -48,7 +51,8 @@ class Signupview extends ConsumerWidget {
                 height: 20,
               ),
               TextField(
-                controller: vm.SignupCheckpassword,
+                controller: vm.signupCheckpassword,
+                focusNode: vm.signupCheckPasswordFocus,
                 decoration: const InputDecoration(
                     border: OutlineInputBorder(), labelText: '패스워드 확인'),
                 obscureText: true,

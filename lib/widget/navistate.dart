@@ -8,6 +8,6 @@ class NaviState {
 }
 
 class Api {
-  //static String baseUrl = dotenv.env['API_BASE_URL']!;
-  static String baseUrl = dotenv.env['API_ANDROID_URL']!;
+  static String baseUrl = dotenv.env['API_BASE_URL']!;
+  //static String baseUrl = dotenv.env['API_ANDROID_URL']!;
 }

@@ -60,7 +60,7 @@ class MainviewState extends ConsumerState<Mainview> {
                   decoration: BoxDecoration(
                     border: Border.all(),
                   ),
-                  child: Image.asset('assets/image/brainrot.jpg'),
+                  // child: Image.asset('assets/image/brainrot.jpg'),
                 ),
               ),
               Container(

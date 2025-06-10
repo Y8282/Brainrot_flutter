@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class Searchview extends StatefulWidget {
+class Searchview extends ConsumerStatefulWidget {
   const Searchview({super.key});
 
   @override
-  State<Searchview> createState() => _SearchviewState();
+  SearchviewState createState() => SearchviewState();
 }
 
-class _SearchviewState extends State<Searchview> {
+class SearchviewState extends ConsumerState<Searchview> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,15 +35,28 @@ class _SearchviewState extends State<Searchview> {
               padding: EdgeInsets.all(8),
               itemCount: 10,
               itemBuilder: (context, index) {
+                final bool? favorite = false;
                 return Container(
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(15),
                       color: Colors.green),
-                  width: 200,
-                  height: 200,
                   padding: EdgeInsets.all(8),
-                  child: GestureDetector(
-                    child: Text("data"),
+                  child: Stack(
+                    children: [
+                      // GestureDetector(
+                      //   child: Image.asset('assets/image/brainrot.jpg'),
+                      // ),
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: GestureDetector(
+                          child: (favorite == true)
+                              ? Icon(Icons.favorite)
+                              : Icon(Icons.favorite_outline),
+                          onTap: () {},
+                        ),
+                      )
+                    ],
                   ),
                 );
               },
