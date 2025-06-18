@@ -20,7 +20,7 @@ class AuthService extends ChangeNotifier {
   }) async {
     final username = parameters['username']?.toString();
     final password = parameters['password']?.toString();
-
+    
     final data = {
       'username': username,
       'password': password,
@@ -47,14 +47,13 @@ class AuthService extends ChangeNotifier {
       'password': parameters['password'],
       'requestId': requestId
     };
-    
-      final response = await _ref.read(httpJsonServiceProvider).sendRequest(
-          method: HttpMethod.POST,
-          url: '/api/auth/signup',
-          data: data,
-          requestId: requestId,
-          callback: callback
-      );
+
+    final response = await _ref.read(httpJsonServiceProvider).sendRequest(
+        method: HttpMethod.POST,
+        url: '/api/auth/signup',
+        data: data,
+        requestId: requestId,
+        callback: callback);
   }
 
   Future<void> logout(BuildContext context) async {

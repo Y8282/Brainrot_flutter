@@ -1,4 +1,6 @@
 import 'package:brainrot_flutter/common/CommonDialog.dart';
+import 'package:brainrot_flutter/home/model/profile_view_model.dart';
+import 'package:brainrot_flutter/login/model/usermodel.dart';
 import 'package:brainrot_flutter/providers/auth_provider.dart';
 import 'package:brainrot_flutter/services/auth_services.dart';
 import 'package:flutter/material.dart';
@@ -171,20 +173,37 @@ class LoginViewModel extends StateNotifier<LoginViewState> {
       return;
     }
 
+    // 결과 추출
+    final result = data['resultData'];
+
     switch (requestId) {
       case 'login':
         if (status == 'COMPLETED' && data['resultCode'] == '000') {
           state = state.copyWith(isLoading: false);
 
-          //토큰 추출
-          final token = data['resultData']?['token'];
+          // 토큰 추출
+          final token = result?['token'];
+          final username = result?['username'];
+          final email = result?['email'];
 
           if (token != null) {
             try {
               await _ref.read(authTokenProvider.notifier).saveToken(token);
+
               final readToken = await _ref
                   .read(secureStorageProvider)
                   .read(key: 'auth_token');
+              await _ref
+                  .read(secureStorageProvider)
+                  .write(key: 'username', value: username);
+              await _ref
+                  .read(secureStorageProvider)
+                  .write(key: 'email', value: email);
+
+              // 유저정보
+              final user = UserModel.fromJson(result);
+              _ref.read(userProvider.notifier).state = user;
+
               final isAuth =
                   await _ref.read(authServiceProvider).isAuthenticated();
               print(isAuth);
@@ -261,6 +280,5 @@ class LoginViewModel extends StateNotifier<LoginViewState> {
     signupEmailFocus.dispose();
     signupPasswordFocus.dispose();
     signupCheckPasswordFocus.dispose();
-
   }
 }

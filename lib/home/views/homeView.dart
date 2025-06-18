@@ -1,7 +1,8 @@
 import 'dart:math';
 
+import 'package:brainrot_flutter/home/model/home_view_model.dart';
 import 'package:brainrot_flutter/home/views/mainView.dart';
-import 'package:brainrot_flutter/home/model/makeImageView.dart';
+import 'package:brainrot_flutter/home/views/makeImageView.dart';
 import 'package:brainrot_flutter/home/views/profileView.dart';
 import 'package:brainrot_flutter/login/views/loginView.dart';
 import 'package:brainrot_flutter/home/views/searchView.dart';
@@ -17,33 +18,9 @@ class Homeview extends ConsumerStatefulWidget {
 }
 
 class HomeViewState extends ConsumerState<Homeview> {
-  final PageController _pageController = PageController();
-  int _currentIndex = 0;
-
-  final List<Widget> _pages = [
-    Mainview(),
-    Searchview(),
-    Makeimageview(),
-    Loginview(),
-    Profileview(),
-  ];
-
-  void _onItemTapped(int index) {
-    _pageController.animateToPage(index,
-        duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
-    setState(() {
-      _currentIndex = index;
-    });
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
+    final vm = ref.watch(homeViewModelProvider.notifier);
     return Scaffold(
       appBar: AppBar(
         title: Text("Brainrot"),
@@ -63,17 +40,17 @@ class HomeViewState extends ConsumerState<Homeview> {
         ],
       ),
       body: PageView(
-        controller: _pageController,
-        children: _pages,
+        controller: vm.pageController,
+        children: vm.pages,
         physics: const NeverScrollableScrollPhysics(),
         onPageChanged: (value) {
           setState(() {
-            _currentIndex = value;
+            vm.currentIndex = value;
           });
         },
       ),
       bottomNavigationBar: CustomBottomNavigator(
-          currentIndex: _currentIndex, onTap: _onItemTapped),
+          currentIndex: vm.currentIndex, onTap: vm.onItemTapped),
     );
   }
 }

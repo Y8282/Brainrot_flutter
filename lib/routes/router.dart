@@ -1,5 +1,5 @@
 import 'package:brainrot_flutter/home/views/homeView.dart';
-import 'package:brainrot_flutter/home/model/makeImageView.dart';
+import 'package:brainrot_flutter/home/views/makeImageView.dart';
 import 'package:brainrot_flutter/login/views/signupView.dart';
 import 'package:brainrot_flutter/providers/auth_provider.dart';
 import 'package:brainrot_flutter/services/auth_services.dart';

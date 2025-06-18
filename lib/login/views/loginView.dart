@@ -9,7 +9,7 @@ class Loginview extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final viewModel = ref.watch(loginViewModelProvider.notifier);
+    final viewModel = ref.read(loginViewModelProvider.notifier);
     final authvm = ref.read(authServiceProvider);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       viewModel.initialize();
@@ -47,11 +47,11 @@ class Loginview extends ConsumerWidget {
                   onPressed: loginState.isLoading
                       ? null
                       : () {
-                          ref.read(loginViewModelProvider.notifier).login(
-                                vm.loginUsername.text,
-                                vm.loginPassword.text,
-                                context,
-                              );
+                          viewModel.login(
+                            vm.loginUsername.text,
+                            vm.loginPassword.text,
+                            context,
+                          );
                         },
                   child: loginState.isLoading
                       ? const CircularProgressIndicator()

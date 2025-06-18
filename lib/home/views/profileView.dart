@@ -1,4 +1,7 @@
 import 'package:brainrot_flutter/common/CommonButton.dart';
+import 'package:brainrot_flutter/home/model/profile_view_model.dart';
+import 'package:brainrot_flutter/login/model/login_view_model.dart';
+import 'package:brainrot_flutter/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +12,7 @@ class Profileview extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final vm = ref.watch(userProvider);
     return Container(
       child: Column(
         children: [
@@ -16,7 +20,7 @@ class Profileview extends ConsumerWidget {
             padding: const EdgeInsets.all(15.0),
             child: Row(
               children: [
-                const Expanded(
+                Expanded(
                   flex: 3,
                   child: Row(
                     children: [
@@ -25,7 +29,7 @@ class Profileview extends ConsumerWidget {
                       //   backgroundImage:
                       //       AssetImage('assets/image/brainrot_profile.jpg'),
                       // ),
-                      Text("_QWER1234"),
+                      Text(vm!.username),
                     ],
                   ),
                 ),

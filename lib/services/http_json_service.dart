@@ -80,6 +80,19 @@ class HttpJsonService {
         );
         print('Response for requestId $requestId: ${response.data}'); // 응답 로그
         callback('COMPLETED', response.data, requestId, null);
+      } else if (method == HttpMethod.GET) {
+        final response = await _dio.get(
+          url,
+          data: data,
+          options: Options(
+            extra: {
+              'callback': callback,
+              'requestId': requestId,
+            },
+          ),
+        );
+        print('Response for requestId $requestId: ${response.data}'); // 응답로그
+        callback('COMPLETED', response.data, requestId, null);
       }
     } on DioException catch (e) {
       print(
