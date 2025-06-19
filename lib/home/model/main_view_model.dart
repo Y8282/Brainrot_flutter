@@ -14,12 +14,14 @@ class MainViewState {
   final bool isInitialized;
   final List<Postmodel>? posts;
   final Map<int, List<Commentmodel>>? comments;
+  final Map<int, bool>? favorite;
 
   MainViewState({
     required this.isLoading,
     required this.isInitialized,
     this.posts,
     this.comments,
+    this.favorite,
   });
 
   MainViewState copyWith({
@@ -27,12 +29,14 @@ class MainViewState {
     bool? isInitialized,
     List<Postmodel>? posts,
     Map<int, List<Commentmodel>>? comments,
+    Map<int, bool>? favorite,
   }) {
     return MainViewState(
       isLoading: isLoading ?? this.isLoading,
       isInitialized: isInitialized ?? this.isInitialized,
       posts: posts ?? this.posts,
       comments: comments ?? this.comments,
+      favorite: favorite ?? this.favorite,
     );
   }
 
@@ -41,6 +45,7 @@ class MainViewState {
         isInitialized: false,
         posts: [],
         comments: {},
+        favorite: {},
       );
 }
 
@@ -51,7 +56,6 @@ final mainViewModelProvider =
 
 class MainViewModel extends StateNotifier<MainViewState> {
   final Ref _ref;
-
   final TextEditingController commentController =
       TextEditingController(); // 댓글 컨트롤러
   final FocusNode focusNode = FocusNode(); // 댓글 포커스
@@ -120,7 +124,7 @@ class MainViewModel extends StateNotifier<MainViewState> {
     commentController.clear();
   }
 
-  // 글 
+  // 글
   Future<void> postList(BuildContext context) async {
     state = state.copyWith(isLoading: true, isInitialized: true, posts: []);
 
@@ -149,9 +153,22 @@ class MainViewModel extends StateNotifier<MainViewState> {
         );
   }
 
-  // 글 하트 
-  Future<void> lovePost(BuildContext? context , int postId) async{
-    final requestId = 'lovepost' ;
+  // 글 하트
+  Future<void> toggleLovePost(BuildContext? context, int postId) async {
+    final requestId = 'lovepost';
+
+    // 유저 Id
+    final vm = _ref.watch(userProvider);
+
+    final parameters = {'postId': postId, 'userId': vm!.email};
+
+    await _ref.read(postServicesProvider).toggleLovePost(
+          parameters: parameters,
+          requestId: requestId,
+          callback: (status, data, requestId, _) {
+            handleCallback(status, data, requestId, context);
+          },
+        );
   }
 
   // api
@@ -249,6 +266,24 @@ class MainViewModel extends StateNotifier<MainViewState> {
           print("error : ${data['resultMessage']}");
         }
         break;
+
+      case 'lovepost':
+        if (resultCode == '000') {
+          final currentFavorites = state.favorite ?? <int, bool>{};
+          final updatedFavorites = Map<int, bool>.from(currentFavorites);
+          final liked = result?['liked'];
+          final postId = result?['postId'] ?? 0;
+
+  
+
+          updatedFavorites[postId] = liked;
+
+          state = state.copyWith(favorite: updatedFavorites);
+
+          state = state.copyWith(favorite: updatedFavorites);
+
+          print('토글 하트! ❤️');
+        }
 
       default:
         print('Unknown requestId: $requestId');

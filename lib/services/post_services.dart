@@ -50,4 +50,18 @@ class PostServices extends ChangeNotifier {
         callback: callback,
         requestId: requestId);
   }
+
+  // 하트
+  Future<void> toggleLovePost({
+    required Map<String, dynamic> parameters,
+    required String requestId,
+    required Function(String, dynamic, String, BuildContext?) callback,
+  }) async {
+    await _ref.read(httpJsonServiceProvider).sendRequest(
+        method: HttpMethod.POST,
+        url: '/api/image/lovepost',
+        data: parameters,
+        callback: callback,
+        requestId: requestId);
+  }
 }

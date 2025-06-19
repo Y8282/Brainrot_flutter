@@ -24,7 +24,6 @@ class MainviewState extends ConsumerState<Mainview> {
   Widget build(BuildContext context) {
     final mainViewState = ref.watch(mainViewModelProvider);
     final mainViewModel = ref.read(mainViewModelProvider.notifier);
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if ((mainViewState.posts!.isEmpty ?? true) && !mainViewState.isLoading) {
         mainViewModel.initialize(context: context);
@@ -50,6 +49,7 @@ class MainviewState extends ConsumerState<Mainview> {
         final double logicalSize =
             1024 / MediaQuery.of(context).devicePixelRatio;
         final rootComments = mainViewState.comments?[post.id] ?? [];
+
         final isExpanded = _expandedPosts.contains(post.id);
         final displayContent = isExpanded || post.content.length < 10
             ? post.content
@@ -121,7 +121,12 @@ class MainviewState extends ConsumerState<Mainview> {
                           spacing: 10,
                           children: [
                             GestureDetector(
-                              child: Icon(Icons.favorite_outline),
+                              child: (mainViewState.favorite?[post.id] ?? false)
+                                  ? Icon(Icons.favorite_outline)
+                                  : Icon(Icons.favorite),
+                              onTap: () async {
+                                mainViewModel.toggleLovePost(context, post.id);
+                              },
                             ),
                             GestureDetector(
                               child: Icon(Icons.chat_bubble_outline),
