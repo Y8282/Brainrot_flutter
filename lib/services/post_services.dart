@@ -25,13 +25,27 @@ class PostServices extends ChangeNotifier {
 
 // 전체 댓글 list
   Future<void> commentList({
-    required Map<String ,dynamic> parameters,
+    required Map<String, dynamic> parameters,
     required String requestId,
     required Function(String, dynamic, String, BuildContext?) callback,
   }) async {
     await _ref.read(httpJsonServiceProvider).sendRequest(
         method: HttpMethod.POST,
         url: '/api/image/commentlist',
+        data: parameters,
+        callback: callback,
+        requestId: requestId);
+  }
+
+  // 댓글 쓰기
+  Future<void> commentSubmit({
+    required Map<String, dynamic> parameters,
+    required String requestId,
+    required Function(String, dynamic, String, BuildContext?) callback,
+  }) async {
+    await _ref.read(httpJsonServiceProvider).sendRequest(
+        method: HttpMethod.POST,
+        url: '/api/image/commentsubmit',
         data: parameters,
         callback: callback,
         requestId: requestId);

@@ -20,7 +20,7 @@ class AuthService extends ChangeNotifier {
   }) async {
     final username = parameters['username']?.toString();
     final password = parameters['password']?.toString();
-    
+
     final data = {
       'username': username,
       'password': password,
@@ -63,6 +63,7 @@ class AuthService extends ChangeNotifier {
 
   Future<bool> isAuthenticated() async {
     final token = _ref.read(authTokenProvider);
+    final vm = _ref.watch(authTokenProvider.notifier);
     print('Checking isAuthenticated, token: $token');
     return token != null;
   }

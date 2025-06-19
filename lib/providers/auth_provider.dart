@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+
 // SecureStorage 인스턴스
 final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
   return const FlutterSecureStorage();
@@ -17,9 +18,7 @@ final authTokenProvider = StateNotifierProvider<AuthProvider, String?>((ref) {
 class AuthProvider extends StateNotifier<String?> {
   final FlutterSecureStorage _storage;
   static const _key = 'auth_token';
-  static const _username = 'username';
   static const _email = 'email';
-
   AuthProvider(this._storage) : super(null) {
     _loadToken();
   }
@@ -32,8 +31,6 @@ class AuthProvider extends StateNotifier<String?> {
       state = null;
       print('Expire delte token : $token');
     } else {
-      final username = await _storage.read(key: _username);
-      final email = await _storage.read(key: _email);
 
       print('Loaded token on init: $token');
       state = token;
@@ -51,8 +48,6 @@ class AuthProvider extends StateNotifier<String?> {
 
   Future<void> clearToken() async {
     await _storage.delete(key: _key);
-    await _storage.delete(key: _username);
-    await _storage.delete(key: _email);
     print('delete token : $_key');
     state = null;
   }

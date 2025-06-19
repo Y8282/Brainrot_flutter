@@ -29,7 +29,7 @@ class HomeViewState extends ConsumerState<Homeview> {
             padding: const EdgeInsets.all(10.0),
             child: Row(
               children: [
-                Icon(Icons.favorite_outline),
+                Icon(Icons.add),
                 SizedBox(
                   width: 20,
                 ),

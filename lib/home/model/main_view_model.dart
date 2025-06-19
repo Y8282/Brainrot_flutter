@@ -2,6 +2,9 @@ import 'dart:convert';
 
 import 'package:brainrot_flutter/home/json/Commentmodel.dart';
 import 'package:brainrot_flutter/home/json/postmodel.dart';
+import 'package:brainrot_flutter/home/model/profile_view_model.dart';
+import 'package:brainrot_flutter/providers/auth_provider.dart';
+import 'package:brainrot_flutter/services/auth_services.dart';
 import 'package:brainrot_flutter/services/post_services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,7 +13,7 @@ class MainViewState {
   final bool isLoading;
   final bool isInitialized;
   final List<Postmodel>? posts;
-  final List<Commentmodel>? comments;
+  final Map<int, List<Commentmodel>>? comments;
 
   MainViewState({
     required this.isLoading,
@@ -23,7 +26,7 @@ class MainViewState {
     bool? isLoading,
     bool? isInitialized,
     List<Postmodel>? posts,
-    List<Commentmodel>? comments,
+    Map<int, List<Commentmodel>>? comments,
   }) {
     return MainViewState(
       isLoading: isLoading ?? this.isLoading,
@@ -37,7 +40,7 @@ class MainViewState {
         isLoading: false,
         isInitialized: false,
         posts: [],
-        comments: [],
+        comments: {},
       );
 }
 
@@ -48,6 +51,10 @@ final mainViewModelProvider =
 
 class MainViewModel extends StateNotifier<MainViewState> {
   final Ref _ref;
+
+  final TextEditingController commentController =
+      TextEditingController(); // 댓글 컨트롤러
+  final FocusNode focusNode = FocusNode(); // 댓글 포커스
 
   MainViewModel(this._ref) : super(MainViewState.initial());
 
@@ -62,7 +69,58 @@ class MainViewModel extends StateNotifier<MainViewState> {
     ]);
   }
 
-  // 글화면
+  // 댓글 쓰기
+  Future<void> handleSubmit(
+      {BuildContext? context, required int postId, int? commentId}) async {
+    // 유저 Id
+    final vm = _ref.watch(userProvider);
+
+    // 댓글내용
+    final content = commentController.text.trim();
+    if (content.isEmpty) return;
+
+    final requestId = 'commentsubmit';
+
+    final parameters = {
+      'postId': postId,
+      'content': content,
+      'userId': vm!.username,
+      if (commentId != null) 'commentId': commentId
+    };
+
+    await _ref.read(postServicesProvider).commentSubmit(
+          parameters: parameters,
+          requestId: requestId,
+          callback: (status, data, requestId, context) {
+            handleCallback(status, data, requestId, context);
+          },
+        );
+
+    // 상태 업데이트
+    final newComment = Commentmodel(
+        id: DateTime.now().microsecondsSinceEpoch,
+        postId: postId,
+        userId: vm.username,
+        content: content,
+        createdAt: DateTime.now().toString(),
+        updatedAt: DateTime.now().toString(),
+        replies: []);
+
+    final exisitingComments = state.comments?[postId] ?? [];
+
+    final updatedComments = [
+      newComment,
+      ...exisitingComments,
+    ];
+
+    state = state.copyWith(
+        comments: {...(state.comments ?? {}), postId: updatedComments});
+
+    print("댓글 ${commentController.text.trim()}");
+    commentController.clear();
+  }
+
+  // 글 
   Future<void> postList(BuildContext context) async {
     state = state.copyWith(isLoading: true, isInitialized: true, posts: []);
 
@@ -77,7 +135,7 @@ class MainViewModel extends StateNotifier<MainViewState> {
   }
 
   // 댓글
-  Future<void> commentList(BuildContext context, int postId) async {
+  Future<void> commentList(BuildContext? context, int postId) async {
     final requestId = 'commentlist';
 
     final parameters = {'postId': postId};
@@ -91,10 +149,15 @@ class MainViewModel extends StateNotifier<MainViewState> {
         );
   }
 
+  // 글 하트 
+  Future<void> lovePost(BuildContext? context , int postId) async{
+    final requestId = 'lovepost' ;
+  }
+
   // api
   Future<void> handleCallback(String status, dynamic data, String requestId,
       BuildContext? context) async {
-    print('HandleCallback: status=$status, requestId=$requestId');
+    print('HandleCallback: status=$status, data=${data}, requestId=$requestId');
 
     // 결과 추출
     final result = data['resultData'];
@@ -152,25 +215,38 @@ class MainViewModel extends StateNotifier<MainViewState> {
               final parent = commentMap[comment.commentId!];
               if (parent != null) {
                 parent.replies.add(comment);
-              } else {
-              }
+              } else {}
             }
           }
 
-          for (var root in rootComments) {
-            print("${root.id} , ${root.content}");
-            for (var reply in root.replies) {
-              print("   └── 💬 [${reply.id}] ${reply.content}");
-            }
-          }
+          // for (var root in rootComments) {
+          //   print("${root.id} , ${root.content}");
+          //   for (var reply in root.replies) {
+          //     print("   └──  [${reply.id}] ${reply.content}");
+          //   }
+          // }
 
-          final existingComments = state.comments ?? [];
-          state = state.copyWith(
-            isLoading: state.posts == null,
-            comments: [...existingComments, ...rootComments],
-          );
+          final postId = comments.isNotEmpty ? comments.first.postId : null;
+
+          if (postId != null) {
+            final exisitngMap = state.comments ?? {};
+            exisitngMap[postId] = rootComments;
+            state = state.copyWith(comments: exisitngMap);
+          }
         } else {
           print('Error: ${data['resultMessage']}');
+        }
+        break;
+
+      case 'commentsubmit':
+        if (resultCode == '000') {
+          print('댓글 추가 성공 😊');
+          final postId = result?['postId'] ?? 0;
+          if (postId != 0) {
+            await commentList(context, postId);
+          }
+        } else {
+          print("error : ${data['resultMessage']}");
         }
         break;
 

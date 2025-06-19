@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:brainrot_flutter/common/CustomBottomSheet.dart';
 import 'package:brainrot_flutter/common/color.dart';
 import 'package:brainrot_flutter/home/json/Commentmodel.dart';
 import 'package:brainrot_flutter/home/model/home_view_model.dart';
@@ -17,6 +18,8 @@ class Mainview extends ConsumerStatefulWidget {
 }
 
 class MainviewState extends ConsumerState<Mainview> {
+  final Set<int> _expandedPosts = {};
+
   @override
   Widget build(BuildContext context) {
     final mainViewState = ref.watch(mainViewModelProvider);
@@ -46,18 +49,16 @@ class MainviewState extends ConsumerState<Mainview> {
         final post = mainViewState.posts![index];
         final double logicalSize =
             1024 / MediaQuery.of(context).devicePixelRatio;
-        final rootComments = mainViewState.comments
-                ?.where(
-                  (comment) =>
-                      comment.postId == post.id && comment.commentId == null,
-                )
-                .toList() ??
-            [];
-
+        final rootComments = mainViewState.comments?[post.id] ?? [];
+        final isExpanded = _expandedPosts.contains(post.id);
+        final displayContent = isExpanded || post.content.length < 10
+            ? post.content
+            : '${post.content.substring(0, 10)}...';
         return Container(
           child: Column(
             children: [
               Container(
+                padding: EdgeInsets.all(5),
                 decoration: BoxDecoration(color: ColorStyles.white),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -81,7 +82,7 @@ class MainviewState extends ConsumerState<Mainview> {
                       ),
                     ),
                     GestureDetector(
-                      child: Icon(Icons.toc),
+                      child: Icon(Icons.info_outline),
                     ),
                   ],
                 ),
@@ -90,9 +91,7 @@ class MainviewState extends ConsumerState<Mainview> {
                 onTap: () {
                   print('이미지 한번 클릭');
                 },
-                onDoubleTap: () {
-                  print('이미지 더블 클릭');
-                },
+                onDoubleTap: () {},
                 child: Container(
                   width: logicalSize,
                   height: logicalSize,
@@ -112,7 +111,8 @@ class MainviewState extends ConsumerState<Mainview> {
                 ),
               ),
               Container(
-                padding: EdgeInsets.all(10),
+                padding: EdgeInsets.all(15),
+                width: MediaQuery.of(context).size.width,
                 child: Column(
                   children: [
                     Row(
@@ -125,6 +125,35 @@ class MainviewState extends ConsumerState<Mainview> {
                             ),
                             GestureDetector(
                               child: Icon(Icons.chat_bubble_outline),
+                              onTap: () {
+                                showModalBottomSheet(
+                                  isScrollControlled: true,
+                                  context: context,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (_) =>
+                                      Consumer(builder: (context, ref, child) {
+                                    final updatedComments = ref
+                                            .watch(mainViewModelProvider)
+                                            .comments?[post.id] ??
+                                        [];
+
+                                    return Custombottomsheet(
+                                      controller:
+                                          mainViewModel.commentController,
+                                      focusNode: mainViewModel.focusNode,
+                                      buttonClick: () {
+                                        mainViewModel.handleSubmit(
+                                            postId: post.id, commentId: null);
+                                      },
+                                      onSubmitted: () {
+                                        mainViewModel.handleSubmit(
+                                            postId: post.id, commentId: null);
+                                      },
+                                      child: commentWidget(updatedComments),
+                                    );
+                                  }),
+                                );
+                              },
                             ),
                           ],
                         ),
@@ -132,85 +161,33 @@ class MainviewState extends ConsumerState<Mainview> {
                     ),
                     Container(
                       width: MediaQuery.of(context).size.width,
-                      height: 150,
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
+                          Wrap(
+                            spacing: 10,
                             children: [
-                              Wrap(
-                                spacing: 10,
-                                children: [
-                                  Text(post.content),
-                                  GestureDetector(
-                                    onTap: () {
-                                      print("더보기 클릭");
-                                    },
-                                    child: Text("더보기"),
-                                  ),
-                                ],
+                              Text(
+                                displayContent,
+                                maxLines: isExpanded ? null : 1,
+                                overflow: isExpanded
+                                    ? TextOverflow.visible
+                                    : TextOverflow.ellipsis,
                               ),
+                              if (post.content.length > 10)
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      if (isExpanded) {
+                                        _expandedPosts.remove(post.id);
+                                      } else {
+                                        _expandedPosts.add(post.id);
+                                      }
+                                    });
+                                  },
+                                  child: Text(!isExpanded ? "더보기" : "숨기기"),
+                                ),
                             ],
-                          ),
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount: rootComments.length,
-                              itemBuilder: (context, commentIndex) {
-                                final rootComment = rootComments[commentIndex];
-                                print(
-                                    "@@@@@@@@@@comment : ${rootComment.content} commentId : ${rootComment.commentId}");
-
-                                return Column(
-                                  children: [
-                                    Container(
-                                      padding: EdgeInsets.all(2),
-                                      child: Row(
-                                        children: [
-                                          CircleAvatar(
-                                            radius: 10,
-                                            backgroundImage: AssetImage(
-                                                'assets/image/brainrot_profile.jpg'),
-                                          ),
-                                          SizedBox(
-                                            width: 8,
-                                          ),
-                                          Text(rootComment.content ?? ''),
-                                        ],
-                                      ),
-                                    ),
-                                    if (rootComment.replies.isNotEmpty)
-                                      Padding(
-                                        padding: EdgeInsets.only(left: 16),
-                                        child: ListView.builder(
-                                          shrinkWrap: true,
-                                          physics:
-                                              NeverScrollableScrollPhysics(),
-                                          itemCount: rootComment.replies.length,
-                                          itemBuilder: (context, replyIndex) {
-                                            final replyComment =
-                                                rootComment.replies[replyIndex];
-                                            print(
-                                                "@@@@@@@@@@reply: ${replyComment.content} commentId: ${replyComment.commentId}");
-                                            return Container(
-                                              padding: EdgeInsets.all(12),
-                                              child: Row(
-                                                children: [
-                                                  CircleAvatar(
-                                                    radius: 10,
-                                                    backgroundImage: AssetImage(
-                                                        'assets/image/brainrot_profile.jpg'),
-                                                  ),
-                                                  Text(replyComment.content ??
-                                                      ''),
-                                                ],
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                  ],
-                                );
-                              },
-                            ),
                           ),
                         ],
                       ),
@@ -222,6 +199,88 @@ class MainviewState extends ConsumerState<Mainview> {
           ),
         );
       },
+    );
+  }
+
+  Expanded commentWidget(List<Commentmodel> rootComments) {
+    return Expanded(
+      child: ListView.builder(
+        itemCount: rootComments.length,
+        itemBuilder: (context, commentIndex) {
+          final rootComment = rootComments[commentIndex];
+          return Column(
+            children: [
+              Container(
+                padding: EdgeInsets.all(7),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 15,
+                      backgroundImage:
+                          AssetImage('assets/image/brainrot_profile.jpg'),
+                    ),
+                    SizedBox(
+                      width: 8,
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(rootComment.userId),
+                        Text(rootComment.content ?? ''),
+                        GestureDetector(
+                          child: Text(
+                            "답글 달기",
+                            style: TextStyle(
+                              color: ColorStyles.gray.withOpacity(1.0),
+                            ),
+                          ),
+                          onTap: () {
+                            print("댓글 클릭");
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              if (rootComment.replies.isNotEmpty)
+                Padding(
+                  padding: EdgeInsets.only(left: 16),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: rootComment.replies.length,
+                    itemBuilder: (context, replyIndex) {
+                      final replyComment = rootComment.replies[replyIndex];
+                      return Container(
+                        padding: EdgeInsets.all(12),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 15,
+                              backgroundImage: AssetImage(
+                                  'assets/image/brainrot_profile.jpg'),
+                            ),
+                            SizedBox(
+                              width: 8,
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Center(child: Text(replyComment.userId)),
+                                Text(replyComment.content ?? ''),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
     );
   }
 }
