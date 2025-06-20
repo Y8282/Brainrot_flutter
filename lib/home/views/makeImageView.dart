@@ -37,7 +37,7 @@ class MakeimageState extends ConsumerState<Makeimageview> {
                   child: Container(
                     child: TextFormField(
                       decoration: InputDecoration(
-                          hintText: "Head", border: OutlineInputBorder()),
+                          hintText: "Body", border: OutlineInputBorder()),
                     ),
                   ),
                 ),
@@ -50,7 +50,7 @@ class MakeimageState extends ConsumerState<Makeimageview> {
                   child: Container(
                     child: TextFormField(
                       decoration: InputDecoration(
-                          hintText: "Head", border: OutlineInputBorder()),
+                          hintText: "Arm", border: OutlineInputBorder()),
                     ),
                   ),
                 ),
@@ -66,19 +66,23 @@ class MakeimageState extends ConsumerState<Makeimageview> {
                   width: 100,
                   child: TextFormField(
                     decoration: InputDecoration(
-                        hintText: "Head", border: OutlineInputBorder()),
+                        hintText: "Leg", border: OutlineInputBorder()),
                   ),
                 ),
                 Container(
                   width: 100,
                   child: TextFormField(
                     decoration: InputDecoration(
-                        hintText: "Head", border: OutlineInputBorder()),
+                        hintText: "Tail", border: OutlineInputBorder()),
                   ),
                 ),
               ],
             ),
-          )
+          ),
+          ElevatedButton(
+            onPressed: null,
+            child: const Text('button'),
+          ),
         ],
       ),
     );

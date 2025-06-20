@@ -18,22 +18,29 @@ class ImageService {
     required Function(String, dynamic, String, BuildContext?) callback,
   }) async {
     await _ref.read(httpJsonServiceProvider).sendRequest(
-      method: HttpMethod.POST,
-      url: '/images/generate',
-      data: {'parameters': parameters},
-      requestId: requestId,
-      callback: (status, data, reqId, context) {
-        if (status == 'COMPLETED' && data['resultCode'] == '000') {
-          final result = {
-            ...data,
-            'imageUrl': '${Api.baseUrl}/images/${data['id']}',
-          };
-          callback(status, result, reqId, context);
-        } else {
-          callback('ERROR', {'message': data['resultMessage'] ?? 'Image generation failed'}, reqId, context);
-        }
-      },
-    );
+          method: HttpMethod.POST,
+          url: '/images/generate',
+          data: {'parameters': parameters},
+          requestId: requestId,
+          callback: (status, data, reqId, context) {
+            if (status == 'COMPLETED' && data['resultCode'] == '000') {
+              final result = {
+                ...data,
+                'image': data['image'],
+              };
+              callback(status, result, reqId, context);
+            } else {
+              callback(
+                  'ERROR',
+                  {
+                    'message':
+                        data['resultMessage'] ?? 'Image generation failed'
+                  },
+                  reqId,
+                  context);
+            }
+          },
+        );
   }
 
   Future<void> getImage({
@@ -42,19 +49,25 @@ class ImageService {
     required Function(String, dynamic, String, BuildContext?) callback,
   }) async {
     await _ref.read(httpJsonServiceProvider).sendRequest(
-      method: HttpMethod.GET,
-      url: '/images/$imageId',
-      requestId: requestId,
-      callback: (status, data, reqId, context) {
-        if (status == 'COMPLETED' && data['resultCode'] == '000') {
-          final result = {
-            'imageUrl': '${Api.baseUrl}/images/$imageId',
-          };
-          callback(status, result, reqId, context);
-        } else {
-          callback('ERROR', {'message': data['resultMessage'] ?? 'Image retrieval failed'}, reqId, context);
-        }
-      },
-    );
+          method: HttpMethod.GET,
+          url: '/images/$imageId',
+          requestId: requestId,
+          callback: (status, data, reqId, context) {
+            if (status == 'COMPLETED' && data['resultCode'] == '000') {
+              final result = {
+                'imageUrl': '${Api.baseUrl}/images/$imageId',
+              };
+              callback(status, result, reqId, context);
+            } else {
+              callback(
+                  'ERROR',
+                  {
+                    'message': data['resultMessage'] ?? 'Image retrieval failed'
+                  },
+                  reqId,
+                  context);
+            }
+          },
+        );
   }
 }
