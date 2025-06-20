@@ -15,14 +15,15 @@ class MainViewState {
   final List<Postmodel>? posts;
   final Map<int, List<Commentmodel>>? comments;
   final Map<int, bool>? favorite;
+  final Map<int, bool>? showHeart;
 
-  MainViewState({
-    required this.isLoading,
-    required this.isInitialized,
-    this.posts,
-    this.comments,
-    this.favorite,
-  });
+  MainViewState(
+      {required this.isLoading,
+      required this.isInitialized,
+      this.posts,
+      this.comments,
+      this.favorite,
+      this.showHeart});
 
   MainViewState copyWith({
     bool? isLoading,
@@ -30,14 +31,15 @@ class MainViewState {
     List<Postmodel>? posts,
     Map<int, List<Commentmodel>>? comments,
     Map<int, bool>? favorite,
+    Map<int, bool>? showHeart,
   }) {
     return MainViewState(
-      isLoading: isLoading ?? this.isLoading,
-      isInitialized: isInitialized ?? this.isInitialized,
-      posts: posts ?? this.posts,
-      comments: comments ?? this.comments,
-      favorite: favorite ?? this.favorite,
-    );
+        isLoading: isLoading ?? this.isLoading,
+        isInitialized: isInitialized ?? this.isInitialized,
+        posts: posts ?? this.posts,
+        comments: comments ?? this.comments,
+        favorite: favorite ?? this.favorite,
+        showHeart: showHeart ?? this.showHeart);
   }
 
   factory MainViewState.initial() => MainViewState(
@@ -46,6 +48,7 @@ class MainViewState {
         posts: [],
         comments: {},
         favorite: {},
+        showHeart: {},
       );
 }
 
@@ -56,6 +59,8 @@ final mainViewModelProvider =
 
 class MainViewModel extends StateNotifier<MainViewState> {
   final Ref _ref;
+
+  late int parentId;
   final TextEditingController commentController =
       TextEditingController(); // 댓글 컨트롤러
   final FocusNode focusNode = FocusNode(); // 댓글 포커스
@@ -73,16 +78,56 @@ class MainViewModel extends StateNotifier<MainViewState> {
     ]);
   }
 
+  // 글 리스트
+  Future<void> postList(BuildContext context) async {
+    state = state.copyWith(isLoading: true, isInitialized: true, posts: []);
+
+    final authUser = _ref.watch(userProvider);
+    final requestId = 'list';
+
+    final parameters = {
+      'userId': authUser!.email,
+    };
+
+    await _ref.read(postServicesProvider).postList(
+          parameters: parameters,
+          requestId: requestId,
+          callback: (status, data, reqId, _) {
+            handleCallback(status, data, requestId, context);
+          },
+        );
+  }
+
+  // 댓글 리스트
+  Future<void> commentList(BuildContext? context, int postId) async {
+    final requestId = 'commentlist';
+
+    final parameters = {'postId': postId};
+
+    await _ref.read(postServicesProvider).commentList(
+          parameters: parameters,
+          requestId: requestId,
+          callback: (status, data, reqId, _) {
+            handleCallback(status, data, requestId, context);
+          },
+        );
+  }
+
   // 댓글 쓰기
   Future<void> handleSubmit(
       {BuildContext? context, required int postId, int? commentId}) async {
     // 유저 Id
     final vm = _ref.watch(userProvider);
 
+    var content = commentController.text;
     // 댓글내용
-    final content = commentController.text.trim();
     if (content.isEmpty) return;
-
+    if (content.startsWith('@${vm!.username}')) {
+      commentId = parentId;
+      content =
+          commentController.text.substring(vm!.username.length + 1).trim();
+      print("@@@@@@@@ ${content}");
+    }
     final requestId = 'commentsubmit';
 
     final parameters = {
@@ -100,57 +145,42 @@ class MainViewModel extends StateNotifier<MainViewState> {
           },
         );
 
-    // 상태 업데이트
-    final newComment = Commentmodel(
-        id: DateTime.now().microsecondsSinceEpoch,
-        postId: postId,
-        userId: vm.username,
-        content: content,
-        createdAt: DateTime.now().toString(),
-        updatedAt: DateTime.now().toString(),
-        replies: []);
-
-    final exisitingComments = state.comments?[postId] ?? [];
-
-    final updatedComments = [
-      newComment,
-      ...exisitingComments,
-    ];
-
-    state = state.copyWith(
-        comments: {...(state.comments ?? {}), postId: updatedComments});
+    commentList(context, postId);
 
     print("댓글 ${commentController.text.trim()}");
     commentController.clear();
   }
 
-  // 글
-  Future<void> postList(BuildContext context) async {
-    state = state.copyWith(isLoading: true, isInitialized: true, posts: []);
-
-    final requestId = 'list';
-
-    await _ref.read(postServicesProvider).postList(
-          requestId: requestId,
-          callback: (status, data, reqId, _) {
-            handleCallback(status, data, requestId, context);
-          },
-        );
+  // 답글 달기
+  Future<void> repliesComment(String userName, int id) async {
+    parentId = id;
+    commentController.text = '@${userName} ';
+    focusNode.requestFocus();
   }
 
-  // 댓글
-  Future<void> commentList(BuildContext? context, int postId) async {
-    final requestId = 'commentlist';
+  // 댓글 삭제
+  Future<void> commentDelete(
+    BuildContext context,
+    int id,
+    int postId,
+  ) async {
+    final requestId = 'commentdelete';
+    final authUser = _ref.watch(userProvider);
+    final parameters = {
+      'postId': postId,
+      'userId': authUser!.username,
+      'id': id
+    };
 
-    final parameters = {'postId': postId};
-
-    await _ref.read(postServicesProvider).commentList(
+    await _ref.read(postServicesProvider).commentDelete(
           parameters: parameters,
           requestId: requestId,
-          callback: (status, data, reqId, _) {
+          callback: (status, data, requestId, _) {
             handleCallback(status, data, requestId, context);
           },
         );
+
+    await commentList(context, postId);
   }
 
   // 글 하트
@@ -185,15 +215,20 @@ class MainViewModel extends StateNotifier<MainViewState> {
           final List<dynamic> postLists = data['resultData']['posts'] ?? [];
           final posts =
               postLists.map((json) => Postmodel.fromJson(json)).toList();
-          print("불러온 글 갯수: ${posts.length}");
+          final favoriteMap = {
+            for (var post in posts) post.id: post.liked ?? false,
+          };
+
           state = state.copyWith(
             isLoading: false,
             posts: posts,
+            favorite: favoriteMap,
           );
 
-          for (var post in posts) {
-            await commentList(context!, post.id);
-          }
+          print("불러온 글 갯수: ${posts.length}");
+          // for (var post in posts) {
+          //   await commentList(context!, post.id);
+          // }
         } else {
           state = state.copyWith(
             isLoading: false,
@@ -257,11 +292,14 @@ class MainViewModel extends StateNotifier<MainViewState> {
 
       case 'commentsubmit':
         if (resultCode == '000') {
-          print('댓글 추가 성공 😊');
-          final postId = result?['postId'] ?? 0;
-          if (postId != 0) {
-            await commentList(context, postId);
-          }
+        } else {
+          print("error : ${data['resultMessage']}");
+        }
+        break;
+
+      case 'commentdelete':
+        if (resultCode == '000') {
+          print('댓글 삭제 성공 👌');
         } else {
           print("error : ${data['resultMessage']}");
         }
@@ -274,16 +312,15 @@ class MainViewModel extends StateNotifier<MainViewState> {
           final liked = result?['liked'];
           final postId = result?['postId'] ?? 0;
 
-  
-
           updatedFavorites[postId] = liked;
 
           state = state.copyWith(favorite: updatedFavorites);
 
-          state = state.copyWith(favorite: updatedFavorites);
-
-          print('토글 하트! ❤️');
+          print('토글 하트! postId: $postId, liked: $liked ❤️');
+        } else {
+          print("error : ${data['resultMessage']}");
         }
+        break;
 
       default:
         print('Unknown requestId: $requestId');

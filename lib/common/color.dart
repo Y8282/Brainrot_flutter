@@ -13,5 +13,6 @@ class ColorStyles{
   static const Color green = Color(0xFFB3E5FC);                        // 연초록
   static const Color yellow = Color(0xFFFFEB3B);                       // 노랑
   static const Color red = Color(0xFFE62E2E);                          // 빨강
+  static const Color transparent = Colors.transparent;                       // 무색
   
 }

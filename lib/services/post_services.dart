@@ -13,12 +13,14 @@ class PostServices extends ChangeNotifier {
 
   // 전체 글 list
   Future<void> postList({
+    required Map<String,dynamic> parameters,
     required String requestId,
     required Function(String, dynamic, String, BuildContext?) callback,
   }) async {
     await _ref.read(httpJsonServiceProvider).sendRequest(
-        method: HttpMethod.GET,
-        url: '/api/image/list',
+        method: HttpMethod.POST,
+        url: '/api/post/list',
+        data: parameters,
         callback: callback,
         requestId: requestId);
   }
@@ -31,7 +33,7 @@ class PostServices extends ChangeNotifier {
   }) async {
     await _ref.read(httpJsonServiceProvider).sendRequest(
         method: HttpMethod.POST,
-        url: '/api/image/commentlist',
+        url: '/api/post/commentlist',
         data: parameters,
         callback: callback,
         requestId: requestId);
@@ -45,7 +47,21 @@ class PostServices extends ChangeNotifier {
   }) async {
     await _ref.read(httpJsonServiceProvider).sendRequest(
         method: HttpMethod.POST,
-        url: '/api/image/commentsubmit',
+        url: '/api/post/commentsubmit',
+        data: parameters,
+        callback: callback,
+        requestId: requestId);
+  }
+
+  // 댓글 삭제
+  Future<void> commentDelete(
+      {required Map<String, dynamic> parameters,
+      required String requestId,
+      required Function(String, dynamic, String, BuildContext?)
+          callback}) async {
+    await _ref.read(httpJsonServiceProvider).sendRequest(
+        method: HttpMethod.POST,
+        url: '/api/post/commentdelete',
         data: parameters,
         callback: callback,
         requestId: requestId);
@@ -59,7 +75,7 @@ class PostServices extends ChangeNotifier {
   }) async {
     await _ref.read(httpJsonServiceProvider).sendRequest(
         method: HttpMethod.POST,
-        url: '/api/image/lovepost',
+        url: '/api/post/lovepost',
         data: parameters,
         callback: callback,
         requestId: requestId);
